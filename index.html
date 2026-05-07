@@ -1,1 +1,1665 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thoth — Estuda com Propósito</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --azul: #1D81C7;
+      --azul-claro: #3A9FE8;
+      --preto: #080808;
+      --preto-2: #0F0F0F;
+      --preto-3: #161616;
+      --branco: #F0EAE0;
+      --cinza: #2A2A2A;
+      --cinza-texto: #8A8A8A;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--preto);
+      color: var(--branco);
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(29,129,199,0.15);
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(16px);
+      transition: all 0.3s;
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--branco);
+      text-decoration: none;
+      letter-spacing: -0.03em;
+    }
+    .nav-logo span { color: var(--azul); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cinza-texto);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--branco); }
+
+    .btn-nav {
+      background: var(--azul);
+      color: var(--branco) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2px;
+      font-size: 0.8rem !important;
+      letter-spacing: 0.1em !important;
+      transition: background 0.2s !important;
+    }
+    .btn-nav:hover { background: var(--azul-claro) !important; color: var(--branco) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10rem 3rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(29,129,199,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,129,199,0.07) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(29,129,199,0.12) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--azul);
+      border: 1px solid rgba(29,129,199,0.4);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      margin-bottom: 2rem;
+      width: fit-content;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--azul);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      max-width: 14ch;
+      position: relative;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero h1 .highlight {
+      color: var(--azul);
+      position: relative;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--cinza-texto);
+      max-width: 45ch;
+      line-height: 1.7;
+      margin-top: 2rem;
+      font-weight: 400;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--azul);
+      color: var(--branco);
+      padding: 1rem 2rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      border-radius: 2px;
+      border: 2px solid var(--azul);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--azul);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      color: var(--branco);
+      padding: 1rem 2rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      border-radius: 2px;
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.5); }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 5rem;
+      padding-top: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+
+    .hero-stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--branco);
+    }
+    .hero-stat-val span { color: var(--azul); }
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--cinza-texto);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.3rem;
+    }
+
+    /* ── MOCK APP PREVIEW ── */
+    .app-preview-wrap {
+      position: absolute;
+      right: 3rem;
+      top: 50%;
+      transform: translateY(-45%);
+      animation: fadeLeft 0.9s 0.3s ease both;
+    }
+
+    @keyframes fadeLeft {
+      from { opacity: 0; transform: translateY(-45%) translateX(40px); }
+      to { opacity: 1; transform: translateY(-45%) translateX(0); }
+    }
+
+    .phone-frame {
+      width: 280px;
+      height: 580px;
+      background: var(--preto-2);
+      border-radius: 40px;
+      border: 1.5px solid rgba(29,129,199,0.3);
+      box-shadow:
+        0 0 60px rgba(29,129,199,0.12),
+        0 40px 80px rgba(0,0,0,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-notch {
+      width: 90px;
+      height: 24px;
+      background: var(--preto);
+      border-radius: 0 0 14px 14px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .phone-content {
+      padding: 0.8rem 1.2rem 1.5rem;
+    }
+
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--azul);
+      margin-bottom: 1rem;
+    }
+
+    .phone-header-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--branco);
+    }
+
+    .phone-avatar {
+      width: 32px; height: 32px;
+      background: var(--azul);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--branco);
+    }
+
+    .phone-timer-section {
+      text-align: center;
+      padding: 1.2rem 0;
+    }
+
+    .phone-timer-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .phone-timer {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--branco);
+      line-height: 1;
+    }
+
+    .phone-cycle {
+      font-size: 0.7rem;
+      color: var(--cinza-texto);
+      margin-top: 0.4rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .phone-progress-bar {
+      height: 3px;
+      background: rgba(29,129,199,0.2);
+      border-radius: 999px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+
+    .phone-progress-fill {
+      height: 100%;
+      background: var(--azul);
+      border-radius: 999px;
+      width: 65%;
+      position: relative;
+      animation: progressPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes progressPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .phone-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 0.8rem 0;
+    }
+
+    .phone-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 2px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: none;
+    }
+
+    .phone-btn-pause {
+      background: var(--cinza);
+      color: var(--branco);
+      flex: 1;
+    }
+    .phone-btn-skip {
+      background: transparent;
+      color: var(--cinza-texto);
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      flex: 1;
+    }
+
+    .phone-tasks-title {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--cinza-texto);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 1rem 0 0.5rem;
+    }
+
+    .phone-task {
+      padding: 0.6rem 0.8rem;
+      background: var(--preto-3);
+      border-radius: 4px;
+      border-left: 2px solid transparent;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .phone-task.active-task {
+      border-left-color: var(--azul);
+      background: rgba(29,129,199,0.08);
+    }
+
+    .phone-task-name {
+      font-size: 0.7rem;
+      color: var(--branco);
+      font-weight: 600;
+    }
+
+    .phone-task-info {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--cinza-texto);
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 7rem 3rem;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 16ch;
+    }
+
+    .section-title span { color: var(--azul); }
+
+    .section-desc {
+      color: var(--cinza-texto);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 50ch;
+      margin-top: 1.2rem;
+      font-weight: 400;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      background: var(--preto-2);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 3rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.5rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.5s ease;
+    }
+
+    .step.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--azul);
+      font-weight: 700;
+      width: 28px;
+      flex-shrink: 0;
+      padding-top: 0.1rem;
+    }
+
+    .step-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--branco);
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--cinza-texto);
+      line-height: 1.6;
+    }
+
+    /* ── POMODORO VISUAL ── */
+    .pomodoro-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .cycle-diagram {
+      position: relative;
+      width: 260px;
+      height: 260px;
+    }
+
+    .cycle-ring {
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      border: 2px solid rgba(29,129,199,0.15);
+      position: absolute;
+      top: 0; left: 0;
+    }
+
+    .cycle-fill {
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: conic-gradient(var(--azul) 0deg 234deg, rgba(29,129,199,0.1) 234deg 360deg);
+      position: absolute;
+      top: 0; left: 0;
+      animation: rotateSlow 12s linear infinite;
+    }
+
+    @keyframes rotateSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .cycle-inner {
+      position: absolute;
+      inset: 12px;
+      background: var(--preto-2);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cycle-inner-time {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--branco);
+      animation: timerCount 1s linear infinite;
+    }
+
+    @keyframes timerCount {
+      0% { opacity: 1; }
+      45% { opacity: 1; }
+      50% { opacity: 0.4; }
+      55% { opacity: 1; }
+    }
+
+    .cycle-inner-label {
+      font-size: 0.75rem;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .cycle-dots {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .cycle-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(29,129,199,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--cinza-texto);
+      transition: all 0.3s;
+    }
+
+    .cycle-dot.done {
+      background: var(--azul);
+      border-color: var(--azul);
+      color: var(--branco);
+    }
+
+    .cycle-dot.current {
+      border-color: var(--azul);
+      color: var(--azul);
+      box-shadow: 0 0 12px rgba(29,129,199,0.4);
+    }
+
+    /* ── FEATURES ── */
+    .features-section {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .features-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.05);
+    }
+
+    .feature-card {
+      background: var(--preto);
+      padding: 2.5rem;
+      transition: background 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .feature-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .feature-card:hover { background: var(--preto-3); }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(29,129,199,0.1);
+      border: 1px solid rgba(29,129,199,0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+      color: var(--branco);
+    }
+
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--cinza-texto);
+      line-height: 1.6;
+    }
+
+    /* ── STATS SECTION ── */
+    .stats-section {
+      background: var(--azul);
+      padding: 5rem 3rem;
+    }
+
+    .stats-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-big {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--preto);
+      line-height: 1;
+    }
+
+    .stat-big-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(8,8,8,0.65);
+      margin-top: 0.6rem;
+    }
+
+    /* ── APP SCREENS ── */
+    .screens-section {
+      padding: 7rem 3rem;
+      overflow: hidden;
+    }
+
+    .screens-header {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+    }
+
+    .screens-strip {
+      display: flex;
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      scrollbar-width: none;
+    }
+
+    .screens-strip::-webkit-scrollbar { display: none; }
+
+    .screen-card {
+      flex-shrink: 0;
+      width: 220px;
+      height: 400px;
+      background: var(--preto-2);
+      border-radius: 24px;
+      border: 1px solid rgba(29,129,199,0.15);
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    .screen-card:hover { transform: translateY(-8px); }
+
+    .screen-top {
+      height: 50%;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      justify-content: flex-end;
+    }
+
+    .screen-top.blue-bg { background: linear-gradient(135deg, rgba(29,129,199,0.25), rgba(29,129,199,0.05)); }
+    .screen-top.dark-bg { background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent); }
+
+    .screen-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .screen-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .screen-bottom {
+      height: 50%;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .screen-title-card {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--branco);
+    }
+
+    .screen-desc-card {
+      font-size: 0.78rem;
+      color: var(--cinza-texto);
+      line-height: 1.5;
+    }
+
+    .screen-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--azul);
+      border: 1px solid rgba(29,129,199,0.3);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    /* ── INTEGRATION ── */
+    .integration-section {
+      background: var(--preto-2);
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .integration-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .integration-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-top: 2.5rem;
+    }
+
+    .integration-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    .integration-item:hover { border-color: rgba(29,129,199,0.3); }
+
+    .integration-item-icon {
+      width: 40px; height: 40px;
+      background: rgba(29,129,199,0.1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .integration-item-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--branco);
+      margin-bottom: 0.3rem;
+    }
+
+    .integration-item-desc {
+      font-size: 0.85rem;
+      color: var(--cinza-texto);
+      line-height: 1.5;
+    }
+
+    /* Firebase Card */
+    .firebase-card {
+      background: var(--preto-3);
+      border: 1px solid rgba(29,129,199,0.2);
+      border-radius: 8px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .firebase-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(29,129,199,0.12), transparent);
+      border-radius: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .firebase-logo {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .firebase-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--branco);
+      margin-bottom: 0.8rem;
+    }
+
+    .firebase-desc {
+      font-size: 0.9rem;
+      color: var(--cinza-texto);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .firebase-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .firebase-feat {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--branco);
+    }
+
+    .firebase-feat::before {
+      content: '→';
+      color: var(--azul);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    /* ── TESTIMONIAL ── */
+    .quote-section {
+      padding: 7rem 3rem;
+      text-align: center;
+    }
+
+    .quote-inner {
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .quote-mark {
+      font-family: 'Space Mono', monospace;
+      font-size: 6rem;
+      color: rgba(29,129,199,0.2);
+      line-height: 0.6;
+      margin-bottom: 2rem;
+      display: block;
+    }
+
+    .quote-text {
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--branco);
+      letter-spacing: -0.02em;
+      font-style: italic;
+    }
+
+    .quote-author {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 2rem;
+    }
+
+    /* ── DOWNLOAD ── */
+    .download-section {
+      background: var(--preto-2);
+      padding: 8rem 3rem;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .download-inner { max-width: 700px; margin: 0 auto; }
+
+    .download-inner .section-title { max-width: 100%; text-align: center; margin: 0 auto; }
+    .download-inner .section-desc { margin: 1.2rem auto 3rem; text-align: center; }
+
+    .download-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .store-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 1rem 1.8rem;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      background: var(--preto);
+      text-decoration: none;
+      color: var(--branco);
+      transition: border-color 0.2s, background 0.2s;
+      min-width: 180px;
+    }
+
+    .store-btn:hover { border-color: var(--azul); background: rgba(29,129,199,0.05); }
+
+    .store-btn-icon { font-size: 1.5rem; }
+
+    .store-btn-text { text-align: left; }
+    .store-btn-small { font-size: 0.65rem; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: 0.08em; }
+    .store-btn-name { font-size: 1rem; font-weight: 700; margin-top: 0.15rem; }
+
+    .download-note {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: var(--cinza-texto);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: gap;
+    }
+
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--branco);
+    }
+    .footer-logo span { color: var(--azul); }
+
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--cinza-texto);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      font-size: 0.8rem;
+      color: var(--cinza-texto);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--branco); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MOBILE MENU ── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      width: 24px; height: 2px;
+      background: var(--branco);
+      transition: all 0.3s;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .app-preview-wrap { display: none; }
+      .how-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .integration-inner { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 5rem 1.5rem; }
+      .features-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 8rem 1.5rem 4rem; }
+      .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+      .download-btns { flex-direction: column; align-items: center; }
+      .stats-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">TH<span>O</span>TH</a>
+    <ul class="nav-links">
+      <li><a href="#como-funciona">Como Funciona</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#integracao">Firebase</a></li>
+      <li><a href="#download" class="btn-nav">Descarregar</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+
+    <div class="hero-badge">App de Estudo · Técnica Pomodoro</div>
+
+    <h1>
+      Estuda com<br/><span class="highlight">foco total.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Thoth combina a técnica Pomodoro com personalização total e sincronização em tempo real. Define os teus próprios tempos, ciclos e tarefas — e o Thoth acompanha-te.
+    </p>
+
+    <div class="hero-cta">
+      <a href="#download" class="btn-primary">
+        <span>↓</span> Descarregar App
+      </a>
+      <a href="#como-funciona" class="btn-secondary">
+        Ver como funciona →
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-val">100<span>%</span></div>
+        <div class="hero-stat-label">Personalizável</div>
+      </div>
+      <div>
+        <div class="hero-stat-val"><span>∞</span></div>
+        <div class="hero-stat-label">Tarefas & Ciclos</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">2<span>x</span></div>
+        <div class="hero-stat-label">Métodos Login</div>
+      </div>
+    </div>
+
+    <!-- Phone Mockup -->
+    <div class="app-preview-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="phone-header">
+            <span class="phone-header-title">THOTH</span>
+            <div class="phone-avatar">JS</div>
+          </div>
+
+          <div class="phone-timer-section">
+            <div class="phone-timer-label">⬤ FOCO · CICLO 2/4</div>
+            <div class="phone-timer" id="phone-timer">24:37</div>
+            <div class="phone-cycle">Projecto Thoth</div>
+          </div>
+
+          <div class="phone-progress-bar">
+            <div class="phone-progress-fill"></div>
+          </div>
+
+          <div class="phone-btn-row">
+            <button class="phone-btn phone-btn-pause">⏸ Pausar</button>
+            <button class="phone-btn phone-btn-skip">⏭ Pular</button>
+          </div>
+
+          <div class="phone-tasks-title">Tarefas</div>
+          <div class="phone-task active-task">
+            <span class="phone-task-name">Projecto Thoth</span>
+            <span class="phone-task-info">90min·4×</span>
+          </div>
+          <div class="phone-task">
+            <span class="phone-task-name">Revisão Matemática</span>
+            <span class="phone-task-info">30min·3×</span>
+          </div>
+          <div class="phone-task">
+            <span class="phone-task-name">Leitura de Filosofia</span>
+            <span class="phone-task-info">45min·2×</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="como-funciona">
+    <div class="how-grid">
+      <div>
+        <div class="section-label">// Como Funciona</div>
+        <h2 class="section-title">Do login ao <span>foco total</span></h2>
+        <p class="section-desc">Em poucos passos estás a estudar com propósito. O Thoth lembra-se de onde ficaste.</p>
+
+        <div class="steps">
+          <div class="step">
+            <span class="step-num">01</span>
+            <div>
+              <div class="step-title">Cria a tua conta</div>
+              <div class="step-desc">Regista-te com email, Google ou Apple. Os teus dados ficam guardados na cloud e acessíveis em qualquer dispositivo.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">02</span>
+            <div>
+              <div class="step-title">Define as tuas tarefas</div>
+              <div class="step-desc">Cria tarefas com o teu próprio tempo de foco, tempo de descanso e número de ciclos. Totalmente personalizado.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">03</span>
+            <div>
+              <div class="step-title">Inicia uma sessão Pomodoro</div>
+              <div class="step-desc">O timer começa. Foco, pausa, ciclo — o Thoth guia-te e guarda o progresso automaticamente.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">04</span>
+            <div>
+              <div class="step-title">Analisa os teus Insights</div>
+              <div class="step-desc">Vê estatísticas reais: total de foco, sessões completas, tarefa mais estudada, histórico por data.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pomodoro-visual">
+        <div class="cycle-diagram">
+          <div class="cycle-ring"></div>
+          <div class="cycle-fill"></div>
+          <div class="cycle-inner">
+            <div class="cycle-inner-time" id="cycle-timer">24:37</div>
+            <div class="cycle-inner-label">Foco Ativo</div>
+          </div>
+        </div>
+        <div class="cycle-dots">
+          <div class="cycle-dot done">1</div>
+          <div class="cycle-dot current">2</div>
+          <div class="cycle-dot">3</div>
+          <div class="cycle-dot">4</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--cinza-texto);">Ciclo 2 de 4 · Projecto Thoth</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="funcionalidades" style="padding:7rem 3rem;">
+    <div class="features-section">
+      <div class="features-header">
+        <div>
+          <div class="section-label">// Funcionalidades</div>
+          <h2 class="section-title">Tudo o que <span>precisas</span></h2>
+        </div>
+        <p style="font-size:0.9rem;color:var(--cinza-texto);max-width:35ch;text-align:right;line-height:1.6;">
+          Desenhado para estudantes que querem resultados, não apenas uma app bonita.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">⏱</div>
+          <div class="feature-title">Pomodoro Personalizável</div>
+          <div class="feature-desc">Define exatamente quanto tempo queres focar e descansar por tarefa. Não és obrigado aos 25 minutos padrão.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.1s">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Gestão de Tarefas</div>
+          <div class="feature-desc">Cria, edita e organiza as tuas tarefas de estudo. O progresso fica guardado mesmo se saires no meio da sessão.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.2s">
+          <div class="feature-icon">☁️</div>
+          <div class="feature-title">Sincronização Cloud</div>
+          <div class="feature-desc">Graças ao Firestore, o teu progresso sincroniza em tempo real. Começa no telemóvel e continua noutro dispositivo.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.0s">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Insights com Dados Reais</div>
+          <div class="feature-desc">Estatísticas calculadas a partir das tuas sessões reais: tempo total de foco, ciclos completados, tarefa mais estudada.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.1s">
+          <div class="feature-icon">✅</div>
+          <div class="feature-title">Lista To-Do</div>
+          <div class="feature-desc">Para além das sessões Pomodoro, tens uma lista de notas e tarefas do dia integrada na mesma app.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.2s">
+          <div class="feature-icon">👤</div>
+          <div class="feature-title">Perfil de Utilizador</div>
+          <div class="feature-desc">Personaliza o teu perfil com nome, descrição e motivações. Um espaço teu dentro da app.</div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">🔐</div>
+          <div class="feature-title">Login Seguro</div>
+          <div class="feature-desc">Email/password ou Google Sign-In. Os teus dados ficam protegidos com as regras de segurança do Firestore.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.1s">
+          <div class="feature-icon">🔄</div>
+          <div class="feature-title">Retomar Progresso</div>
+          <div class="feature-desc">Interrompeste a sessão? Sem problema. O Thoth guarda o progresso de cada tarefa e permite retomá-la exatamente onde ficaste.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.2s">
+          <div class="feature-icon">🌙</div>
+          <div class="feature-title">Interface Focada</div>
+          <div class="feature-desc">Tema escuro com design minimalista. Nada de distração — o foco é mesmo focar.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-section">
+    <div class="stats-inner">
+      <div>
+        <div class="stat-big">4+</div>
+        <div class="stat-big-label">Ecrãs principais</div>
+      </div>
+      <div>
+        <div class="stat-big">3</div>
+        <div class="stat-big-label">Métodos de login</div>
+      </div>
+      <div>
+        <div class="stat-big">∞</div>
+        <div class="stat-big-label">Tarefas personalizadas</div>
+      </div>
+      <div>
+        <div class="stat-big">RT</div>
+        <div class="stat-big-label">Sincronização em tempo real</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SCREENS -->
+  <section class="screens-section">
+    <div class="screens-header reveal">
+      <div class="section-label">// Ecrãs da App</div>
+      <h2 class="section-title">Uma app, <span>vários contextos</span></h2>
+      <p class="section-desc">Do login às estatísticas, cada ecrã foi pensado para te manter focado no que importa.</p>
+    </div>
+    <div class="screens-strip">
+      <div class="screen-card">
+        <div class="screen-top blue-bg">
+          <div class="screen-icon">🔐</div>
+          <div class="screen-name">Login</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Tela de Login</div>
+            <div class="screen-desc-card">Email, Google ou Apple. Registo simples e rápido com Firebase Auth.</div>
+          </div>
+          <div class="screen-tag">auth_service.dart</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-top dark-bg">
+          <div class="screen-icon">🏠</div>
+          <div class="screen-name">Início</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Dashboard Principal</div>
+            <div class="screen-desc-card">Lista de tarefas, última tarefa em progresso e acesso rápido ao timer.</div>
+          </div>
+          <div class="screen-tag">main.dart</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-top blue-bg">
+          <div class="screen-icon">⏱</div>
+          <div class="screen-name">Timer</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Sessão Pomodoro</div>
+            <div class="screen-desc-card">Timer em tempo real, progresso por ciclo e controlos de pause/skip.</div>
+          </div>
+          <div class="screen-tag">main.dart</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-top dark-bg">
+          <div class="screen-icon">📊</div>
+          <div class="screen-name">Insights</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Estatísticas</div>
+            <div class="screen-desc-card">Foco total, ciclos completos, tarefa mais estudada e histórico de sessões.</div>
+          </div>
+          <div class="screen-tag">tela_insights.dart</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-top blue-bg">
+          <div class="screen-icon">✅</div>
+          <div class="screen-name">To-Do</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Lista de Tarefas</div>
+            <div class="screen-desc-card">Notas e tarefas do dia, separadas das sessões Pomodoro mas integradas na mesma app.</div>
+          </div>
+          <div class="screen-tag">item_todo.dart</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-top dark-bg">
+          <div class="screen-icon">👤</div>
+          <div class="screen-name">Perfil</div>
+        </div>
+        <div class="screen-bottom">
+          <div>
+            <div class="screen-title-card">Perfil de Utilizador</div>
+            <div class="screen-desc-card">Nome, descrição e motivações. O teu espaço dentro do Thoth.</div>
+          </div>
+          <div class="screen-tag">perfil_usuario.dart</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRATION / FIREBASE -->
+  <section class="integration-section" id="integracao">
+    <div class="integration-inner" style="max-width:1200px;margin:0 auto;padding:7rem 0;">
+      <div class="reveal">
+        <div class="section-label">// Integração Firebase</div>
+        <h2 class="section-title">Dados teus, <span>sempre contigo</span></h2>
+        <p class="section-desc">O Thoth usa Firebase para garantir que os teus dados estão seguros, sincronizados e acessíveis em qualquer dispositivo.</p>
+
+        <div class="integration-list">
+          <div class="integration-item">
+            <div class="integration-item-icon">🔑</div>
+            <div>
+              <div class="integration-item-title">Firebase Authentication</div>
+              <div class="integration-item-desc">Login com Email e Google. Sem passwords fracas, sem fricção.</div>
+            </div>
+          </div>
+          <div class="integration-item">
+            <div class="integration-item-icon">🗄️</div>
+            <div>
+              <div class="integration-item-title">Cloud Firestore</div>
+              <div class="integration-item-desc">Base de dados em tempo real. Tarefas, sessões e perfil guardados e sincronizados automaticamente.</div>
+            </div>
+          </div>
+          <div class="integration-item">
+            <div class="integration-item-icon">⚡</div>
+            <div>
+              <div class="integration-item-title">Stream em Tempo Real</div>
+              <div class="integration-item-desc">Actualizações instantâneas via Firestore Streams. Abres a app e já está tudo lá.</div>
+            </div>
+          </div>
+          <div class="integration-item">
+            <div class="integration-item-icon">🛡️</div>
+            <div>
+              <div class="integration-item-title">Regras de Segurança</div>
+              <div class="integration-item-desc">Cada utilizador só acede aos seus próprios dados. Regras Firestore configuradas para proteger a tua privacidade.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" style="transition-delay:0.2s">
+        <div class="firebase-card">
+          <div class="firebase-logo">🔥</div>
+          <div class="firebase-title">Firebase + Flutter</div>
+          <div class="firebase-desc">
+            O Thoth foi construído com Flutter e integra o ecossistema Firebase completo. A app funciona no iOS e Android com a mesma base de código e os mesmos dados.
+          </div>
+          <div class="firebase-features">
+            <div class="firebase-feat">firebase_core + firebase_auth</div>
+            <div class="firebase-feat">cloud_firestore com streams</div>
+            <div class="firebase-feat">google_sign_in integrado</div>
+            <div class="firebase-feat">Dados em europe-west1 (Portugal)</div>
+            <div class="firebase-feat">Índices Firestore optimizados</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem;padding:1.5rem;border:1px solid rgba(255,255,255,0.06);border-radius:4px;">
+          <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--azul);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.1em;">Estrutura de Dados</div>
+          <pre style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--cinza-texto);line-height:1.8;"><span style="color:var(--azul)">users/</span> {uid}/
+  nome, cognome, descricao
+  <span style="color:var(--azul)">tarefas/</span> {id}/
+    nome, estudo, descanso
+    ciclos, progressoSalvo
+  <span style="color:var(--azul)">sessoes/</span> {id}/
+    tarefaId, dataInicio
+    ciclosCompletos, concluida</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-section">
+    <div class="quote-inner reveal">
+      <span class="quote-mark">"</span>
+      <div class="quote-text">
+        A vitória pertence aos mais perseverantes.
+      </div>
+      <div class="quote-author">— Napoleão Bonaparte · Exibida no Thoth</div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section class="download-section" id="download">
+    <div class="download-inner reveal">
+      <div class="section-label" style="text-align:center;display:block;">// Descarrega Agora</div>
+      <h2 class="section-title">Começa a estudar<br/><span>melhor hoje.</span></h2>
+      <p class="section-desc">
+        Disponível para Android. Gratuito. Sem anúncios. Sem distrações.
+      </p>
+
+      <div class="download-btns">
+        <a href="#" class="store-btn">
+          <div class="store-btn-icon">▶</div>
+          <div class="store-btn-text">
+            <div class="store-btn-small">Disponível no</div>
+            <div class="store-btn-name">Google Play</div>
+          </div>
+        </a>
+        <a href="#" class="store-btn">
+          <div class="store-btn-icon">⬇</div>
+          <div class="store-btn-text">
+            <div class="store-btn-small">Instalar via</div>
+            <div class="store-btn-name">APK Direto</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="download-note">
+        Thoth · Flutter + Firebase · iOS & Android
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">TH<span>O</span>TH</div>
+    <div class="footer-links">
+      <a href="#como-funciona">Como Funciona</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#integracao">Firebase</a>
+      <a href="#download">Descarregar</a>
+    </div>
+    <div class="footer-copy">© 2026 Thoth · Feito com ♥</div>
+  </footer>
+
+  <script>
+    // ── TIMER ANIMATION ──
+    let seconds = 24 * 60 + 37;
+    const timerEl = document.getElementById('phone-timer');
+    const cycleEl = document.getElementById('cycle-timer');
+
+    setInterval(() => {
+      if (seconds > 0) seconds--;
+      else seconds = 25 * 60;
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      const t = `${m}:${s}`;
+      if (timerEl) timerEl.textContent = t;
+      if (cycleEl) cycleEl.textContent = t;
+    }, 1000);
+
+    // ── SCROLL REVEAL ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal, .step, .feature-card').forEach(el => observer.observe(el));
+
+    // ── STEPS DELAY ──
+    document.querySelectorAll('.step').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.1}s`;
+    });
+
+    // ── NAV SCROLL ──
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        nav.style.borderBottomColor = 'rgba(29,129,199,0.25)';
+      } else {
+        nav.style.borderBottomColor = 'rgba(29,129,199,0.15)';
+      }
+    });
+
+    // ── HAMBURGER ──
+    const ham = document.getElementById('hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    ham?.addEventListener('click', () => {
+      if (navLinks.style.display === 'flex') {
+        navLinks.style.display = 'none';
+      } else {
+        navLinks.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          top: 70px; left: 0; right: 0;
+          background: rgba(8,8,8,0.98);
+          padding: 2rem;
+          gap: 1.5rem;
+          border-bottom: 1px solid rgba(29,129,199,0.2);
+          backdrop-filter: blur(16px);
+        `;
+      }
+    });
+
+    // Close nav links on click
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        navLinks.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
